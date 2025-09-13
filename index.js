@@ -81,7 +81,6 @@ function shuffleArray(array) {
 
 // Función para precargar imágenes de manera optimizada y aleatoria
 async function preloadImages() {
-  console.log("🖼️ Iniciando precarga optimizada de imágenes aleatorias...");
 
   const { preloadCount } = OPTIMIZATION_CONFIG;
   
@@ -168,54 +167,6 @@ function cleanupInvisibleImages() {
     console.log(`🧹 Limpieza: removidas ${imagesToRemove.length} imágenes`);
   }
 }
-
-// Función para verificar si una imagen está en viewport
-function isInViewport(element) {
-  const rect = element.getBoundingClientRect();
-  const threshold = OPTIMIZATION_CONFIG.lazyLoadThreshold;
-
-  return (
-    rect.top >= -threshold &&
-    rect.left >= -threshold &&
-    rect.bottom <=
-      (window.innerHeight || document.documentElement.clientHeight) +
-        threshold &&
-    rect.right <=
-      (window.innerWidth || document.documentElement.clientWidth) + threshold
-  );
-}
-
-// Monitor de rendimiento
-const performanceMonitor = {
-  loadTimes: [],
-  errors: 0,
-
-  recordLoadTime(time) {
-    this.loadTimes.push(time);
-    if (this.loadTimes.length > 10) {
-      this.loadTimes.shift(); // Mantener solo las últimas 10
-    }
-  },
-
-  recordError() {
-    this.errors++;
-  },
-
-  getAverageLoadTime() {
-    if (this.loadTimes.length === 0) return 0;
-    return this.loadTimes.reduce((a, b) => a + b, 0) / this.loadTimes.length;
-  },
-
-  getStats() {
-    return {
-      avgLoadTime: this.getAverageLoadTime(),
-      totalErrors: this.errors,
-      cacheSize: imageCache.size,
-      loadedCount: loadedImages.size,
-      failedCount: failedImages.size,
-    };
-  },
-};
 
 // FUNCIONES DE GESTIÓN DE REGISTROS 📋
 // =======================================
@@ -341,66 +292,7 @@ function showRegistrationStats() {
 // INTEGRACIÓN CON SERVICIOS EXTERNOS 🌐
 // =======================================
 
-// OPCIÓN 1: Google Sheets (Más potente)
-async function sendToGoogleSheets(name) {
-  try {
-    // URL de tu Google Apps Script (debes crear uno)
-    const SCRIPT_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
-
-    const data = {
-      name: name,
-      timestamp: new Date().toISOString(),
-      date: new Date().toLocaleDateString("es-ES"),
-      time: new Date().toLocaleTimeString("es-ES"),
-      userAgent: navigator.userAgent,
-    };
-
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    console.log("📊 Datos enviados a Google Sheets");
-    return true;
-  } catch (error) {
-    console.error("❌ Error enviando a Google Sheets:", error);
-    return false;
-  }
-}
-
-// OPCIÓN 2: EmailJS (Envío por email)
-async function sendViaEmailJS(name) {
-  try {
-    // Inicializar EmailJS (necesitas registrarte en emailjs.com)
-    emailjs.init("TU_USER_ID_DE_EMAILJS");
-
-    const templateParams = {
-      to_email: "tu_email@gmail.com", // Tu email donde recibirás las confirmaciones
-      from_name: name,
-      message: `Nueva confirmación de asistencia: ${name}`,
-      date: new Date().toLocaleDateString("es-ES"),
-      time: new Date().toLocaleTimeString("es-ES"),
-    };
-
-    await emailjs.send(
-      "TU_SERVICE_ID", // Service ID de EmailJS
-      "TU_TEMPLATE_ID", // Template ID de EmailJS
-      templateParams
-    );
-
-    console.log("📧 Email enviado via EmailJS");
-    return true;
-  } catch (error) {
-    console.error("❌ Error enviando email:", error);
-    return false;
-  }
-}
-
-// OPCIÓN 3: Formspree (Más simple)
+// Formspree (Más simple)
 async function sendToFormspree(name) {
   try {
     // URL de tu formulario Formspree (gratis hasta 50 envíos/mes)
@@ -428,41 +320,6 @@ async function sendToFormspree(name) {
     }
   } catch (error) {
     console.error("❌ Error enviando a Formspree:", error);
-    return false;
-  }
-}
-
-// OPCIÓN 4: Webhook genérico (para cualquier servicio)
-async function sendToWebhook(name) {
-  try {
-    // URL de tu webhook (Zapier, Make.com, etc.)
-    const WEBHOOK_URL = "TU_WEBHOOK_URL_AQUI";
-
-    const data = {
-      event: "birthday_rsvp",
-      name: name,
-      timestamp: new Date().toISOString(),
-      date: new Date().toLocaleDateString("es-ES"),
-      time: new Date().toLocaleTimeString("es-ES"),
-      source: "birthday_invitation",
-    };
-
-    const response = await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (response.ok) {
-      console.log("🔗 Datos enviados al webhook");
-      return true;
-    } else {
-      throw new Error("Error en webhook");
-    }
-  } catch (error) {
-    console.error("❌ Error enviando al webhook:", error);
     return false;
   }
 }
@@ -500,12 +357,41 @@ async function submitRegistration(name) {
 
 // =======================================
 
-// 🎨 SISTEMA DE BACKGROUND DINÁMICO CON COLLAGE
-// =============================================
+// 🎨 SISTEMA DE BACKGROUND DINÁMICO CON COLLAGE MEJORADO
+// ====================================================
 
 // Pool de imágenes para el background (sin repetición)
 let backgroundImagePool = [];
 let currentBackgroundIndex = 0;
+let preloadedBackgroundImages = new Map(); // Cache para imágenes de background
+let isBackgroundChanging = false; // Flag para evitar cambios superpuestos
+
+// Función para precargar imagen de background
+async function preloadBackgroundImage(imageName) {
+  return new Promise((resolve, reject) => {
+    // Si ya está en cache, devolver inmediatamente
+    if (preloadedBackgroundImages.has(imageName)) {
+      resolve(preloadedBackgroundImages.get(imageName));
+      return;
+    }
+
+    const img = new Image();
+    
+    img.onload = () => {
+      const imageUrl = `url('photos/${imageName}')`;
+      preloadedBackgroundImages.set(imageName, imageUrl);
+      console.log(`📸 Background precargado: ${imageName}`);
+      resolve(imageUrl);
+    };
+
+    img.onerror = () => {
+      console.warn(`❌ Error precargando background: ${imageName}`);
+      reject(new Error(`Failed to preload background ${imageName}`));
+    };
+
+    img.src = `photos/${imageName}`;
+  });
+}
 
 // Función para obtener la siguiente imagen de background
 function getNextBackgroundImage() {
@@ -523,403 +409,85 @@ function getNextBackgroundImage() {
   return image;
 }
 
-// Función para cambiar el background dinámicamente
-function changeBackgroundImage() {
-  const nextImage = getNextBackgroundImage();
-  const imageUrl = `url('photos/${nextImage}')`;
-  
-  console.log(`🖼️ Cambiando background a: ${nextImage}`);
-  
-  // Actualizar la variable CSS que controla el background
-  document.documentElement.style.setProperty('--dynamic-bg-image', imageUrl);
-}
+// Función para cambiar el background dinámicamente (mejorada)
+async function changeBackgroundImage() {
+  // Evitar cambios superpuestos
+  if (isBackgroundChanging) {
+    console.log("⏳ Cambio de background ya en progreso, saltando...");
+    return;
+  }
 
-// Función para inicializar el sistema de background dinámico
-function initializeDynamicBackground() {
-  console.log("🎨 Inicializando sistema de background dinámico...");
-  
-  // Establecer la primera imagen inmediatamente
-  changeBackgroundImage();
-  
-  // Cambiar imagen cada 5 segundos
-  setInterval(() => {
-    changeBackgroundImage();
-  }, 5000);
-  
-  console.log("✅ Sistema de background dinámico activado - cambio cada 5 segundos");
-}
-
-// =======================================
-
-// Animaciones disponibles
-const animations = [
-  "spin",
-  "bounce",
-  "float",
-  "shake",
-  "pulse",
-  "zigzag",
-  "explode",
-];
-
-// Contenedor para el caos de fondo
-const backgroundChaos = document.querySelector(".background");
-
-// Función para obtener una posición aleatoria
-function getRandomPosition() {
-  return {
-    x: Math.random() * (window.innerWidth - 100),
-    y: Math.random() * (window.innerHeight - 100),
-  };
-}
-
-// Función para obtener una animación aleatoria
-function getRandomAnimation() {
-  return animations[Math.floor(Math.random() * animations.length)];
-}
-
-// Función para crear una imagen flotante optimizada
-async function createFloatingImage(imageName) {
-  const startTime = performance.now();
+  isBackgroundChanging = true;
 
   try {
-    // Intentar cargar la imagen de manera optimizada
-    const cachedImg = await loadImageOptimized(imageName);
-
-    const container = document.createElement("div");
-    container.className = "floating-image";
-
-    const img = document.createElement("img");
-    img.src = cachedImg.src;
-    img.alt = "Meme épico";
-
-    // Aplicar tamaño óptimo según dispositivo
-    const optimalSize = getOptimalImageSize();
-    container.style.width = optimalSize.width + "px";
-    container.style.height = optimalSize.height + "px";
-
-    // Posición aleatoria
-    const position = getRandomPosition();
-    container.style.left = position.x + "px";
-    container.style.top = position.y + "px";
-
-    // Animación aleatoria
-    const animation = getRandomAnimation();
-    container.classList.add(animation);
-
-    // Duración de animación adaptativa (más lenta en móviles para mejor rendimiento)
-    const baseDuration = isMobileDevice() ? 4 : 2;
-    const duration = baseDuration + Math.random() * 3;
-    container.style.animationDuration = duration + "s";
-
-    // Delay aleatorio
-    const delay = Math.random() * 2;
-    container.style.animationDelay = delay + "s";
-
-    // Intersection Observer para lazy loading/unloading
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.style.opacity = "0.8";
-            } else {
-              // Reducir opacidad cuando no está visible para ahorrar recursos
-              entry.target.style.opacity = "0.3";
-            }
-          });
-        },
-        {
-          threshold: 0.1,
-          rootMargin: "50px",
-        }
-      );
-
-      observer.observe(container);
-    }
-
-    container.appendChild(img);
-
-    // Registrar tiempo de carga
-    const loadTime = performance.now() - startTime;
-    performanceMonitor.recordLoadTime(loadTime);
-
-    return container;
+    const nextImageName = getNextBackgroundImage();
+    
+    // Precargar la imagen antes de cambiarla
+    console.log(`🔄 Precargando siguiente background: ${nextImageName}`);
+    const imageUrl = await preloadBackgroundImage(nextImageName);
+    
+    // Aplicar la imagen solo cuando esté completamente cargada
+    console.log(`🖼️ Cambiando background a: ${nextImageName}`);
+    document.documentElement.style.setProperty('--dynamic-bg-image', imageUrl);
+    
+    // Precargar las próximas 2-3 imágenes de manera proactiva
+    preloadNextBackgroundImages();
+    
   } catch (error) {
-    performanceMonitor.recordError();
-    console.warn(
-      `⚠️ No se pudo cargar imagen ${imageName}, usando placeholder`
-    );
-
-    // Crear placeholder si la imagen falla
-    return createPlaceholderImage(imageName);
+    console.warn(`⚠️ Error cambiando background, intentando con la siguiente imagen:`, error);
+    // Intentar con la siguiente imagen si falla
+    setTimeout(() => {
+      isBackgroundChanging = false;
+      changeBackgroundImage();
+    }, 1000);
+    return;
   }
+
+  isBackgroundChanging = false;
 }
 
-// Función para crear imagen placeholder en caso de error
-function createPlaceholderImage(imageName) {
-  const container = document.createElement("div");
-  container.className = "floating-image placeholder";
-
-  const placeholder = document.createElement("div");
-  placeholder.style.cssText = `
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: white;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-  `;
-  placeholder.textContent = "🎉";
-
-  const optimalSize = getOptimalImageSize();
-  container.style.width = optimalSize.width + "px";
-  container.style.height = optimalSize.height + "px";
-
-  // Posición aleatoria
-  const position = getRandomPosition();
-  container.style.left = position.x + "px";
-  container.style.top = position.y + "px";
-
-  // Animación aleatoria
-  const animation = getRandomAnimation();
-  container.classList.add(animation);
-
-  const duration = 3 + Math.random() * 2;
-  container.style.animationDuration = duration + "s";
-
-  container.appendChild(placeholder);
-  return container;
-}
-
-// Función para mover imagen a nueva posición
-function moveToRandomPosition(element) {
-  const position = getRandomPosition();
-  element.style.transition = "all 3s ease-in-out";
-  element.style.left = position.x + "px";
-  element.style.top = position.y + "px";
-
-  // Cambiar animación aleatoriamente
-  setTimeout(() => {
-    const currentAnimations = element.className
-      .split(" ")
-      .filter((cls) => !animations.includes(cls));
-    element.className =
-      currentAnimations.join(" ") + " " + getRandomAnimation();
-  }, 1500);
-}
-
-// Función para crear el caos inicial optimizado
-async function createChaos() {
-  console.log("🎪 Iniciando caos optimizado con carga aleatoria...");
-
-  // Limpiar el contenedor
-  backgroundChaos.innerHTML = "";
-
-  // Determinar cantidad de imágenes según dispositivo
-  const isMobile = isMobileDevice();
-  const maxImages = isMobile ? 8 : 15; // Menos imágenes en móviles
+// Función para precargar proactivamente las siguientes imágenes
+async function preloadNextBackgroundImages() {
+  const preloadCount = 3; // Precargar las próximas 3 imágenes
   
-  // Mezclar todas las imágenes de manera aleatoria
-  const shuffledImages = shuffleArray(images);
-  const imagesToUse = shuffledImages.slice(0, maxImages);
-  
-  console.log(`🎲 Orden aleatorio de caos: ${imagesToUse.slice(0, 5).join(', ')}...`);
-
-  // Carga progresiva: primero las imágenes más importantes (ahora aleatorias)
-  const priorityImages = imagesToUse.slice(0, 5);
-  const secondaryImages = imagesToUse.slice(5);
-
-  // Fase 1: Cargar imágenes prioritarias inmediatamente (orden aleatorio)
-  console.log("📱 Cargando imágenes prioritarias aleatorias...");
-  for (let i = 0; i < priorityImages.length; i++) {
-    const imageName = priorityImages[i];
-
-    try {
-      const floatingImage = await createFloatingImage(imageName);
-      backgroundChaos.appendChild(floatingImage);
-
-      // Configurar movimiento con throttling en móviles
-      const moveInterval = isMobile ? 8000 : 5000; // Movimiento más lento en móviles
-      setInterval(() => {
-        if (isInViewport(floatingImage) || !isMobile) {
-          moveToRandomPosition(floatingImage);
-        }
-      }, moveInterval + Math.random() * 3000);
-
-      // Pequeña pausa entre cargas para no bloquear
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    } catch (error) {
-      console.warn(`⚠️ Error cargando imagen prioritaria ${imageName}:`, error);
+  for (let i = 1; i <= preloadCount; i++) {
+    const futureIndex = (currentBackgroundIndex + i - 1) % backgroundImagePool.length;
+    const futureImageName = backgroundImagePool[futureIndex];
+    
+    if (futureImageName && !preloadedBackgroundImages.has(futureImageName)) {
+      try {
+        await preloadBackgroundImage(futureImageName);
+      } catch (error) {
+        console.warn(`⚠️ Error precargando imagen futura: ${futureImageName}`);
+      }
     }
   }
-
-  // Fase 2: Cargar imágenes secundarias gradualmente (orden aleatorio)
-  if (secondaryImages.length > 0) {
-    console.log("🖼️ Cargando imágenes secundarias aleatorias...");
-
-    setTimeout(async () => {
-      for (let i = 0; i < secondaryImages.length; i++) {
-        const imageName = secondaryImages[i];
-
-        // Verificar si no estamos sobrecargando
-        const currentImages =
-          document.querySelectorAll(".floating-image").length;
-        if (currentImages >= OPTIMIZATION_CONFIG.maxActiveImages) {
-          console.log("🛑 Límite de imágenes alcanzado, pausando carga");
-          break;
-        }
-
-        try {
-          const floatingImage = await createFloatingImage(imageName);
-          backgroundChaos.appendChild(floatingImage);
-
-          const moveInterval = isMobile ? 10000 : 6000;
-          setInterval(() => {
-            if (isInViewport(floatingImage) || !isMobile) {
-              moveToRandomPosition(floatingImage);
-            }
-          }, moveInterval + Math.random() * 4000);
-
-          // Pausa más larga entre imágenes secundarias
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        } catch (error) {
-          console.warn(
-            `⚠️ Error cargando imagen secundaria ${imageName}:`,
-            error
-          );
-        }
-      }
-
-      console.log("✅ Caos aleatorio inicial completado");
-
-      // Iniciar limpieza periódica
-      setInterval(cleanupInvisibleImages, 30000); // Cada 30 segundos
-    }, 2000); // Esperar 2 segundos antes de cargar secundarias
-  }
-
-  // Mostrar estadísticas de rendimiento
-  setTimeout(() => {
-    const stats = performanceMonitor.getStats();
-    console.log("📊 Estadísticas de rendimiento:", stats);
-  }, 5000);
 }
 
-// Función para hacer que las imágenes aparezcan y desaparezcan
-function createAppearDisappearEffect() {
-  setInterval(() => {
-    const allImages = document.querySelectorAll(".floating-image");
-
-    // Hacer desaparecer algunas imágenes aleatoriamente
-    allImages.forEach((img) => {
-      if (Math.random() < 0.1) {
-        // 10% de probabilidad
-        img.style.opacity = "0";
-        img.style.transform = "scale(0) rotate(720deg)";
-
-        // Hacerlas reaparecer después de un tiempo
-        setTimeout(() => {
-          img.style.opacity = "0.8";
-          img.style.transform = "scale(1) rotate(0deg)";
-          moveToRandomPosition(img);
-        }, 2000 + Math.random() * 3000);
-      }
-    });
-  }, 3000);
-}
-
-// Pool de imágenes para explosiones aleatorias (sin repetición)
-let explosionImagePool = [];
-
-// Función para obtener la siguiente imagen aleatoria sin repetición
-function getNextRandomImage() {
-  // Si el pool está vacío, rellenarlo con una mezcla aleatoria
-  if (explosionImagePool.length === 0) {
-    explosionImagePool = shuffleArray(images);
-    console.log("🎲 Pool de explosiones rellenado con orden aleatorio");
-  }
+// Función para inicializar el sistema de background dinámico (mejorada)
+async function initializeDynamicBackground() {
+  console.log("🎨 Inicializando sistema de background dinámico mejorado...");
   
-  // Tomar la siguiente imagen del pool (garantiza no repetición hasta agotar todas)
-  return explosionImagePool.pop();
+  try {
+    // Establecer la primera imagen inmediatamente (con precarga)
+    await changeBackgroundImage();
+    
+    // Cambiar imagen cada 5 segundos
+    setInterval(async () => {
+      await changeBackgroundImage();
+    }, 5000);
+    
+    console.log("✅ Sistema de background dinámico activado - cambio cada 5 segundos");
+  } catch (error) {
+    console.error("❌ Error inicializando background dinámico:", error);
+    // Fallback: usar la primera imagen sin precarga
+    const fallbackImage = images[0];
+    const fallbackUrl = `url('photos/${fallbackImage}')`;
+    document.documentElement.style.setProperty('--dynamic-bg-image', fallbackUrl);
+    console.log("🆘 Usando imagen fallback para background");
+  }
 }
 
-// Función optimizada para explosiones aleatorias
-function createRandomExplosions() {
-  const isMobile = isMobileDevice();
-  const explosionInterval = isMobile ? 15000 : 8000; // Menos frecuentes en móviles
-
-  setInterval(async () => {
-    // Verificar si no tenemos demasiadas imágenes
-    const currentImages = document.querySelectorAll(".floating-image").length;
-    if (currentImages >= OPTIMIZATION_CONFIG.maxActiveImages) {
-      return; // Skip si ya hay muchas imágenes
-    }
-
-    try {
-      // Crear una imagen temporal que explote (sin repetición)
-      const randomImage = getNextRandomImage();
-      const explosion = await createFloatingImage(randomImage);
-
-      explosion.style.animation = "explode 1s ease-out";
-      explosion.style.transform = "scale(2)";
-      explosion.style.opacity = "1";
-
-      backgroundChaos.appendChild(explosion);
-
-      console.log(`💥 Explosión aleatoria: ${randomImage} (quedan ${explosionImagePool.length} en pool)`);
-
-      // Eliminar después de la explosión
-      setTimeout(() => {
-        if (explosion.parentNode) {
-          explosion.remove();
-        }
-      }, 1000);
-    } catch (error) {
-      console.warn("⚠️ Error en explosión aleatoria:", error);
-    }
-  }, explosionInterval + Math.random() * 5000);
-}
-
-// Función optimizada para efectos de aparición/desaparición
-function createAppearDisappearEffect() {
-  const isMobile = isMobileDevice();
-  const effectInterval = isMobile ? 5000 : 3000; // Menos frecuente en móviles
-
-  setInterval(() => {
-    const allImages = document.querySelectorAll(
-      ".floating-image:not(.placeholder)"
-    );
-
-    // Hacer desaparecer algunas imágenes aleatoriamente
-    allImages.forEach((img) => {
-      // Probabilidad más baja en móviles para mejor rendimiento
-      const probability = isMobile ? 0.05 : 0.1;
-
-      if (Math.random() < probability) {
-        img.style.opacity = "0";
-        img.style.transform = "scale(0) rotate(720deg)";
-
-        // Hacerlas reaparecer después de un tiempo
-        setTimeout(() => {
-          if (img.parentNode) {
-            img.style.opacity = "0.8";
-            img.style.transform = "scale(1) rotate(0deg)";
-
-            // Solo mover si está en viewport o no es móvil
-            if (isInViewport(img) || !isMobile) {
-              moveToRandomPosition(img);
-            }
-          }
-        }, 2000 + Math.random() * 3000);
-      }
-    });
-  }, effectInterval);
-}
 
 // Manejo del formulario
 const form = document.getElementById("rsvpForm");
@@ -943,7 +511,6 @@ form.addEventListener("submit", async function (e) {
 
   // Crear explosión de imágenes aleatorias sin repetición
   const formExplosionPool = shuffleArray(images).slice(0, 10);
-  console.log("🎆 Explosión del formulario con 10 imágenes aleatorias");
   
   for (let i = 0; i < 10; i++) {
     setTimeout(async () => {
@@ -990,7 +557,6 @@ form.addEventListener("submit", async function (e) {
       }, 4000);
     }, 2000);
   } catch (error) {
-    console.error("❌ Error general:", error);
 
     setTimeout(() => {
       alert(
@@ -1054,7 +620,7 @@ window.addEventListener("scroll", () => {
 
 // Inicializar el caos cuando la página cargue - VERSIÓN OPTIMIZADA
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("🎉 ¡Iniciando el caos más épico OPTIMIZADO! 🎉");
+  console.log("🎉 ¡Iniciando sistema mejorado! 🎉");
 
   // Detectar capacidades del dispositivo
   const isMobile = isMobileDevice();
@@ -1065,8 +631,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log(`📱 Dispositivo: ${isMobile ? "Móvil" : "Desktop"}`);
   console.log(`🌐 Conexión: ${connectionSpeed}`);
 
-  // Inicializar sistema de background dinámico PRIMERO
-  initializeDynamicBackground();
+  // Inicializar sistema de background dinámico PRIMERO (con await)
+  await initializeDynamicBackground();
 
   // Ajustar configuración según capacidades
   if (isMobile || connectionSpeed === "slow-2g" || connectionSpeed === "2g") {
@@ -1075,26 +641,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("⚡ Modo de bajo rendimiento activado");
   }
 
-  // Precargar imágenes críticas
-  try {
-    await preloadImages();
-  } catch (error) {
-    console.warn("⚠️ Error en precarga, continuando de todas formas:", error);
-  }
-
-  // Crear el caos inicial
-  await createChaos();
-
-  // Iniciar efectos adicionales con delay escalonado
-  setTimeout(() => {
-    createAppearDisappearEffect();
-    console.log("✨ Efectos de aparición/desaparición activados");
-  }, 3000);
-
-  setTimeout(() => {
-    createRandomExplosions();
-    console.log("💥 Explosiones aleatorias activadas");
-  }, 5000);
 
   // Efectos especiales en el título
   const title = document.querySelector(".title");
@@ -1109,7 +655,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     // Crear un pool específico para esta explosión masiva
     const titleExplosionPool = shuffleArray(images).slice(0, explosionCount);
-    console.log(`🎆 Explosión masiva del título con ${explosionCount} imágenes aleatorias`);
 
     for (let i = 0; i < explosionCount; i++) {
       setTimeout(async () => {
@@ -1130,47 +675,4 @@ document.addEventListener("DOMContentLoaded", async () => {
       }, i * 50);
     }
   });
-
-  // Monitor de rendimiento
-  setInterval(() => {
-    const imageCount = document.querySelectorAll(".floating-image").length;
-    const memoryInfo = performance.memory
-      ? {
-          used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024),
-          total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024),
-        }
-      : null;
-
-    console.log(
-      `📊 Rendimiento: ${imageCount} imágenes activas`,
-      memoryInfo ? `| Memoria: ${memoryInfo.used}MB/${memoryInfo.total}MB` : ""
-    );
-
-    // Auto-cleanup si hay demasiadas imágenes
-    if (imageCount > OPTIMIZATION_CONFIG.maxActiveImages * 1.5) {
-      console.log("🧹 Limpieza automática activada");
-      cleanupInvisibleImages();
-    }
-  }, 15000); // Cada 15 segundos
-
-  // Listener para cambios de visibilidad de página
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      // Pausar animaciones cuando la página no es visible
-      document.querySelectorAll(".floating-image").forEach((img) => {
-        img.style.animationPlayState = "paused";
-      });
-      console.log("⏸️ Animaciones pausadas (página oculta)");
-    } else {
-      // Reanudar animaciones cuando la página vuelve a ser visible
-      document.querySelectorAll(".floating-image").forEach((img) => {
-        img.style.animationPlayState = "running";
-      });
-      console.log("▶️ Animaciones reanudadas");
-    }
-  });
 });
-
-// ¡Modo súper loco activado!
-console.log("¡MODO SÚPER LOCO ACTIVADO!");
-console.log("🎂 ¡Prepárate para la fiesta más épica! 🎂");

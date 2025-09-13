@@ -27,7 +27,30 @@ body::before {
     background-position: 0 0;
     opacity: 1;
     pointer-events: none;
-    transition: background-image 1s ease-in-out;
+    transition: background-image 1.5s ease-in-out, opacity 0.8s ease-in-out;
+}
+
+@keyframes backgroundFlow {
+    0% { 
+        transform: translateX(0) translateY(0) rotate(0deg);
+        background-position: 0 0;
+    }
+    25% {
+        transform: translateX(-30px) translateY(-20px) rotate(1deg);
+        background-position: -15px -10px;
+    }
+    50% { 
+        transform: translateX(-60px) translateY(-40px) rotate(0deg);
+        background-position: -30px -20px;
+    }
+    75% {
+        transform: translateX(-90px) translateY(-60px) rotate(-1deg);
+        background-position: -45px -30px;
+    }
+    100% { 
+        transform: translateX(-120px) translateY(-80px) rotate(0deg);
+        background-position: -60px -40px;
+    }
 }
 
 /* Animaciones optimizadas para mejor rendimiento */
@@ -323,6 +346,11 @@ body::before {
         font-size: 2rem;
     }
     
+    /* Background optimizado para tablet */
+    body::before {
+        background-size: 140px auto;
+        animation-duration: 35s; /* Más lento para mejor rendimiento */
+    }
 
     .form-group input{
         background: rgba(255, 255, 255, 0.2);
@@ -355,6 +383,11 @@ body::before {
         height: 100%;
     }
     
+    /* Background optimizado para móvil pequeño */
+    body::before {
+        background-size: 110px auto;
+        animation-duration: 45s; /* Aún más lento para ahorrar batería */
+    }
 
     .form-group input {
         background: rgba(255, 255, 255, 0.15);
