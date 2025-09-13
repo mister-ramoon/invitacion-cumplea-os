@@ -75,31 +75,31 @@ body {
 
 /* Animaciones optimizadas para mejor rendimiento */
 .spin { 
-    animation: spin 15s linear infinite; 
+    animation: spin 5s linear infinite; 
     transform: translateZ(0);
 }
 .bounce { 
-    animation: bounce 15s infinite; 
+    animation: bounce 5s infinite; 
     transform: translateZ(0);
 }
 .float { 
-    animation: float 15s ease-in-out infinite; 
+    animation: float 5s ease-in-out infinite; 
     transform: translateZ(0);
 }
 .shake { 
-    animation: shake 15s infinite; 
+    animation: shake 5s infinite; 
     transform: translateZ(0);
 }
 .pulse { 
-    animation: pulse 15s infinite; 
+    animation: pulse 5s infinite; 
     transform: translateZ(0);
 }
 .zigzag { 
-    animation: zigzag 15s infinite; 
+    animation: zigzag 5s infinite; 
     transform: translateZ(0);
 }
 .explode { 
-    animation: explode 15s infinite; 
+    animation: explode 5s infinite; 
     transform: translateZ(0);
 }
 
@@ -156,13 +156,13 @@ body {
 }
 
 /* Clases de animación que se aplicarán dinámicamente */
-.spin { animation: spin 15s linear infinite; }
-.bounce { animation: bounce 15s infinite; }
-.float { animation: float 15s ease-in-out infinite; }
-.shake { animation: shake 15s infinite; }
-.pulse { animation: pulse 15s infinite; }
-.zigzag { animation: zigzag 15s infinite; }
-.explode { animation: explode 15s infinite; }
+.spin { animation: spin 5s linear infinite; }
+.bounce { animation: bounce 5s infinite; }
+.float { animation: float 5s ease-in-out infinite; }
+.shake { animation: shake 5s infinite; }
+.pulse { animation: pulse 5s infinite; }
+.zigzag { animation: zigzag 5s infinite; }
+.explode { animation: explode 5s infinite; }
 
 .container {
     display: flex;
