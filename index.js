@@ -500,6 +500,57 @@ async function submitRegistration(name) {
 
 // =======================================
 
+// 🎨 SISTEMA DE BACKGROUND DINÁMICO CON COLLAGE
+// =============================================
+
+// Pool de imágenes para el background (sin repetición)
+let backgroundImagePool = [];
+let currentBackgroundIndex = 0;
+
+// Función para obtener la siguiente imagen de background
+function getNextBackgroundImage() {
+  // Si el pool está vacío, rellenarlo con una mezcla aleatoria
+  if (backgroundImagePool.length === 0) {
+    backgroundImagePool = shuffleArray(images);
+    currentBackgroundIndex = 0;
+    console.log("🎲 Pool de background rellenado con orden aleatorio");
+  }
+  
+  // Tomar la siguiente imagen del pool
+  const image = backgroundImagePool[currentBackgroundIndex];
+  currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundImagePool.length;
+  
+  return image;
+}
+
+// Función para cambiar el background dinámicamente
+function changeBackgroundImage() {
+  const nextImage = getNextBackgroundImage();
+  const imageUrl = `url('photos/${nextImage}')`;
+  
+  console.log(`🖼️ Cambiando background a: ${nextImage}`);
+  
+  // Actualizar la variable CSS que controla el background
+  document.documentElement.style.setProperty('--dynamic-bg-image', imageUrl);
+}
+
+// Función para inicializar el sistema de background dinámico
+function initializeDynamicBackground() {
+  console.log("🎨 Inicializando sistema de background dinámico...");
+  
+  // Establecer la primera imagen inmediatamente
+  changeBackgroundImage();
+  
+  // Cambiar imagen cada 5 segundos
+  setInterval(() => {
+    changeBackgroundImage();
+  }, 5000);
+  
+  console.log("✅ Sistema de background dinámico activado - cambio cada 5 segundos");
+}
+
+// =======================================
+
 // Animaciones disponibles
 const animations = [
   "spin",
@@ -512,7 +563,7 @@ const animations = [
 ];
 
 // Contenedor para el caos de fondo
-const backgroundChaos = document.querySelector(".background-chaos");
+const backgroundChaos = document.querySelector(".background");
 
 // Función para obtener una posición aleatoria
 function getRandomPosition() {
@@ -933,7 +984,7 @@ form.addEventListener("submit", async function (e) {
 
       // Resetear el botón después de un tiempo
       setTimeout(() => {
-        submitBtn.innerHTML = "🚀 ¡CONFIRMAR ASISTENCIA! 🚀";
+        submitBtn.innerHTML = " ¡CONFIRMAR ASISTENCIA!";
         submitBtn.style.animation = "buttonPulse 2s infinite";
         submitBtn.disabled = false;
       }, 4000);
@@ -950,7 +1001,7 @@ form.addEventListener("submit", async function (e) {
       submitBtn.style.animation = "shake 0.5s infinite";
 
       setTimeout(() => {
-        submitBtn.innerHTML = "🚀 ¡CONFIRMAR ASISTENCIA! 🚀";
+        submitBtn.innerHTML = " ¡CONFIRMAR ASISTENCIA! ";
         submitBtn.style.animation = "buttonPulse 2s infinite";
         submitBtn.disabled = false;
       }, 4000);
@@ -1013,6 +1064,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   console.log(`📱 Dispositivo: ${isMobile ? "Móvil" : "Desktop"}`);
   console.log(`🌐 Conexión: ${connectionSpeed}`);
+
+  // Inicializar sistema de background dinámico PRIMERO
+  initializeDynamicBackground();
 
   // Ajustar configuración según capacidades
   if (isMobile || connectionSpeed === "slow-2g" || connectionSpeed === "2g") {
@@ -1118,5 +1172,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ¡Modo súper loco activado!
-console.log("🚀 ¡MODO SÚPER LOCO ACTIVADO! 🚀");
+console.log("¡MODO SÚPER LOCO ACTIVADO!");
 console.log("🎂 ¡Prepárate para la fiesta más épica! 🎂");

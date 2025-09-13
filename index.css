@@ -6,70 +6,28 @@
 
 body {
     font-family: 'Comic Sans MS', cursive, sans-serif;
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #dda0dd);
     background-size: 400% 400%;
-    animation: gradientShift 10s ease infinite;
-    min-height: 100vh;
+    min-height: 100svh;
     overflow-x: hidden;
     position: relative;
 }
 
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.background-chaos {
+/* Sistema de background con collage de imagen única que cambia */
+body::before {
+    content: '';
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 1;
-    pointer-events: none;
-}
-
-.floating-image {
-    position: absolute;
+    background-image: var(--dynamic-bg-image, none);
+    background-size: 200px auto;
+    background-repeat: repeat;
+    background-position: 0 0;
     opacity: 1;
     pointer-events: none;
-}
-
-.floating-image img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-    /* Optimización de renderizado */
-    will-change: transform;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-}
-
-/* Placeholder para imágenes que fallan al cargar */
-.floating-image.placeholder {
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    animation: placeholderPulse 2s ease-in-out infinite;
-}
-
-@keyframes placeholderPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-/* Optimización de animaciones */
-.floating-image {
-    position: absolute;
-    opacity: 1;
-    pointer-events: none;
-    /* Mejorar rendimiento de animaciones */
-    will-change: transform, opacity;
-    transform: translateZ(0);
+    transition: background-image 1s ease-in-out;
 }
 
 /* Animaciones optimizadas para mejor rendimiento */
@@ -267,37 +225,26 @@ body {
 
 .rsvp-form h3 {
     text-align: center;
-    color: #6c5ce7;
     font-size: 1.8rem;
+    color: #fff;
     margin-bottom: 25px;
     animation: formTitleGlow 2s infinite;
-    text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8), 0 0 10px rgba(108, 92, 231, 0.8);
+    text-shadow: 2px 2px 0px rgba(000, 000, 000, 0.8), 0 0 10px rgba(225, 112, 85, 0.8);
 }
 
 @keyframes formTitleGlow {
-    0%, 100% { text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8), 0 0 5px #6c5ce7; }
-    50% { text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8), 0 0 20px #6c5ce7, 0 0 30px #6c5ce7; }
+    0%, 100% { text-shadow: 2px 2px 0px rgba(00, 00, 00, 0.8), 0 0 5px #ff6b6b; }
+    50% { text-shadow: 2px 2px 0px rgba(00, 00, 00, 0.8), 0 0 20px #ff6b6b, 0 0 30px #ff6b6b; }
 }
 
 .form-group {
     margin-bottom: 20px;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #6c5ce7;
-    font-size: 1.1rem;
-    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
+.form-group input {
     width: 100%;
     padding: 12px;
-    border: 3px solid #74b9ff;
+    border: 3px solid #ff6b6b;
     border-radius: 10px;
     font-size: 1rem;
     font-family: inherit;
@@ -305,38 +252,33 @@ body {
     background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     color: white;
-     font-weight: bold;
+    font-weight: bold;
     font-size: x-large;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group input:focus {
     outline: none;
-    border-color: #6c5ce7;
+    border-color: #ff6b6b;
     transform: scale(1.02);
-    box-shadow: 0 0 15px rgba(108, 92, 231, 0.5);
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
     animation: inputGlow 1s infinite;
     color: white;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
-.form-group input::placeholder,
-.form-group select::placeholder,
-.form-group textarea::placeholder {
+.form-group input::placeholder {
     color: #fff;
     font-weight: bold;
     font-size: x-large;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 @keyframes inputGlow {
-    0%, 100% { box-shadow: 0 0 15px rgba(108, 92, 231, 0.5); }
-    50% { box-shadow: 0 0 25px rgba(108, 92, 231, 0.8); }
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(255, 107, 107, 0.8); }
 }
 
-.form-group textarea {
-    height: 100px;
-    resize: vertical;
-}
 
 .submit-btn {
     width: 100%;
@@ -381,18 +323,8 @@ body {
         font-size: 2rem;
     }
     
-    .subtitle {
-        font-size: 1.1rem;
-    }
-    
-    .floating-image img {
-        width: 100%;
-        height: 100%;
-    }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
+
+    .form-group input{
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         color: white;
@@ -414,10 +346,6 @@ body {
         font-size: 1.5rem;
     }
     
-    .subtitle {
-        font-size: 1rem;
-    }
-    
     .party-details p {
         font-size: 1rem;
     }
@@ -427,9 +355,8 @@ body {
         height: 100%;
     }
     
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
+
+    .form-group input {
         background: rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(10px);
         color: white;
