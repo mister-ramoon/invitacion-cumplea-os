@@ -38,8 +38,8 @@ body {
 
 .floating-image img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    object-fit: contain;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.3);
     /* Optimización de renderizado */
     will-change: transform;
@@ -185,7 +185,7 @@ body {
     animation: cardFloat 8s ease-in-out infinite;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(30px);
 }
 
 @keyframes cardFloat {
