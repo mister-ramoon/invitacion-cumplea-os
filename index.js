@@ -41,7 +41,7 @@ const OPTIMIZATION_CONFIG = {
   maxConcurrentLoads: 3, // Máximo 3 imágenes cargando simultáneamente
   retryAttempts: 2, // Intentos de recarga si falla
   preloadCount: 8, // Precargar primeras 8 imágenes
-  maxActiveImages: 15, // Máximo 15 imágenes activas en pantalla
+  maxActiveImages: 30, // Máximo 30 imágenes activas en pantalla
   lazyLoadThreshold: 100, // Distancia en px para activar lazy loading
 };
 
@@ -61,20 +61,35 @@ function getOptimalImageSize() {
   const screenWidth = window.innerWidth;
 
   if (isMobile && screenWidth <= 480) {
-    return { width: 80, height: 80 }; // Móvil pequeño
+    return { width: 180, height: 180 }; // Móvil pequeño
   } else if (isMobile && screenWidth <= 768) {
-    return { width: 100, height: 100 }; // Móvil/tablet
+    return { width: 200, height: 200 }; // Móvil/tablet
   } else {
-    return { width: 150, height: 150 }; // Desktop
+    return { width: 300, height: 300 }; // Desktop
   }
 }
 
-// Función para precargar imágenes de manera optimizada
+// Función para mezclar array (Fisher-Yates shuffle)
+function shuffleArray(array) {
+  const shuffled = [...array]; // Crear copia para no modificar el original
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Función para precargar imágenes de manera optimizada y aleatoria
 async function preloadImages() {
-  console.log("🖼️ Iniciando precarga optimizada de imágenes...");
+  console.log("🖼️ Iniciando precarga optimizada de imágenes aleatorias...");
 
   const { preloadCount } = OPTIMIZATION_CONFIG;
-  const imagesToPreload = images.slice(0, preloadCount);
+  
+  // Mezclar las imágenes de manera aleatoria
+  const shuffledImages = shuffleArray(images);
+  const imagesToPreload = shuffledImages.slice(0, preloadCount);
+  
+  console.log(`🎲 Orden aleatorio de precarga: ${imagesToPreload.slice(0, 5).join(', ')}...`);
 
   // Precargar en lotes pequeños para no saturar la red
   for (let i = 0; i < imagesToPreload.length; i += 2) {
@@ -83,7 +98,7 @@ async function preloadImages() {
 
     try {
       await Promise.allSettled(promises);
-      console.log(`✅ Lote ${Math.floor(i / 2) + 1} precargado`);
+      console.log(`✅ Lote aleatorio ${Math.floor(i / 2) + 1} precargado: ${batch.join(', ')}`);
     } catch (error) {
       console.warn(`⚠️ Error en lote ${Math.floor(i / 2) + 1}:`, error);
     }
@@ -92,7 +107,7 @@ async function preloadImages() {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  console.log("🎉 Precarga completada");
+  console.log("🎉 Precarga aleatoria completada");
 }
 
 // Función para cargar imagen de manera optimizada
@@ -650,7 +665,7 @@ function moveToRandomPosition(element) {
 
 // Función para crear el caos inicial optimizado
 async function createChaos() {
-  console.log("🎪 Iniciando caos optimizado...");
+  console.log("🎪 Iniciando caos optimizado con carga aleatoria...");
 
   // Limpiar el contenedor
   backgroundChaos.innerHTML = "";
@@ -658,14 +673,19 @@ async function createChaos() {
   // Determinar cantidad de imágenes según dispositivo
   const isMobile = isMobileDevice();
   const maxImages = isMobile ? 8 : 15; // Menos imágenes en móviles
-  const imagesToUse = images.slice(0, maxImages);
+  
+  // Mezclar todas las imágenes de manera aleatoria
+  const shuffledImages = shuffleArray(images);
+  const imagesToUse = shuffledImages.slice(0, maxImages);
+  
+  console.log(`🎲 Orden aleatorio de caos: ${imagesToUse.slice(0, 5).join(', ')}...`);
 
-  // Carga progresiva: primero las imágenes más importantes
+  // Carga progresiva: primero las imágenes más importantes (ahora aleatorias)
   const priorityImages = imagesToUse.slice(0, 5);
   const secondaryImages = imagesToUse.slice(5);
 
-  // Fase 1: Cargar imágenes prioritarias inmediatamente
-  console.log("📱 Cargando imágenes prioritarias...");
+  // Fase 1: Cargar imágenes prioritarias inmediatamente (orden aleatorio)
+  console.log("📱 Cargando imágenes prioritarias aleatorias...");
   for (let i = 0; i < priorityImages.length; i++) {
     const imageName = priorityImages[i];
 
@@ -688,9 +708,9 @@ async function createChaos() {
     }
   }
 
-  // Fase 2: Cargar imágenes secundarias gradualmente
+  // Fase 2: Cargar imágenes secundarias gradualmente (orden aleatorio)
   if (secondaryImages.length > 0) {
-    console.log("🖼️ Cargando imágenes secundarias...");
+    console.log("🖼️ Cargando imágenes secundarias aleatorias...");
 
     setTimeout(async () => {
       for (let i = 0; i < secondaryImages.length; i++) {
@@ -725,7 +745,7 @@ async function createChaos() {
         }
       }
 
-      console.log("✅ Caos inicial completado");
+      console.log("✅ Caos aleatorio inicial completado");
 
       // Iniciar limpieza periódica
       setInterval(cleanupInvisibleImages, 30000); // Cada 30 segundos
@@ -762,6 +782,21 @@ function createAppearDisappearEffect() {
   }, 3000);
 }
 
+// Pool de imágenes para explosiones aleatorias (sin repetición)
+let explosionImagePool = [];
+
+// Función para obtener la siguiente imagen aleatoria sin repetición
+function getNextRandomImage() {
+  // Si el pool está vacío, rellenarlo con una mezcla aleatoria
+  if (explosionImagePool.length === 0) {
+    explosionImagePool = shuffleArray(images);
+    console.log("🎲 Pool de explosiones rellenado con orden aleatorio");
+  }
+  
+  // Tomar la siguiente imagen del pool (garantiza no repetición hasta agotar todas)
+  return explosionImagePool.pop();
+}
+
 // Función optimizada para explosiones aleatorias
 function createRandomExplosions() {
   const isMobile = isMobileDevice();
@@ -775,8 +810,8 @@ function createRandomExplosions() {
     }
 
     try {
-      // Crear una imagen temporal que explote
-      const randomImage = images[Math.floor(Math.random() * images.length)];
+      // Crear una imagen temporal que explote (sin repetición)
+      const randomImage = getNextRandomImage();
       const explosion = await createFloatingImage(randomImage);
 
       explosion.style.animation = "explode 1s ease-out";
@@ -784,6 +819,8 @@ function createRandomExplosions() {
       explosion.style.opacity = "1";
 
       backgroundChaos.appendChild(explosion);
+
+      console.log(`💥 Explosión aleatoria: ${randomImage} (quedan ${explosionImagePool.length} en pool)`);
 
       // Eliminar después de la explosión
       setTimeout(() => {
@@ -853,11 +890,14 @@ form.addEventListener("submit", async function (e) {
   submitBtn.style.animation = "buttonExplode 0.3s infinite";
   submitBtn.disabled = true;
 
-  // Crear explosión de imágenes
+  // Crear explosión de imágenes aleatorias sin repetición
+  const formExplosionPool = shuffleArray(images).slice(0, 10);
+  console.log("🎆 Explosión del formulario con 10 imágenes aleatorias");
+  
   for (let i = 0; i < 10; i++) {
-    setTimeout(() => {
-      const randomImage = images[Math.floor(Math.random() * images.length)];
-      const explosion = createFloatingImage(randomImage);
+    setTimeout(async () => {
+      const randomImage = formExplosionPool[i]; // Sin repetición garantizada
+      const explosion = await createFloatingImage(randomImage);
       explosion.style.animation = "explode 2s ease-out";
       explosion.style.left = window.innerWidth / 2 - 50 + "px";
       explosion.style.top = window.innerHeight / 2 - 50 + "px";
@@ -921,12 +961,11 @@ form.addEventListener("submit", async function (e) {
 // Efectos adicionales en inputs
 const inputs = document.querySelectorAll("input, select, textarea");
 inputs.forEach((input) => {
-  input.addEventListener("focus", () => {
-    // Crear pequeña explosión en el input
+  input.addEventListener("focus", async () => {
+    // Crear pequeña explosión en el input con imagen aleatoria
     const rect = input.getBoundingClientRect();
-    const miniExplosion = createFloatingImage(
-      images[Math.floor(Math.random() * images.length)]
-    );
+    const randomImage = getNextRandomImage(); // Sin repetición
+    const miniExplosion = await createFloatingImage(randomImage);
 
     miniExplosion.style.left = rect.left + rect.width / 2 + "px";
     miniExplosion.style.top = rect.top - 30 + "px";
@@ -1011,13 +1050,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       title.style.animation = "titleBounce 0.5s infinite";
     }, 100);
 
-    // Crear explosión masiva optimizada
+    // Crear explosión masiva optimizada con imágenes aleatorias sin repetición
     const explosionCount = isMobile ? 8 : 15; // Menos explosiones en móviles
+    
+    // Crear un pool específico para esta explosión masiva
+    const titleExplosionPool = shuffleArray(images).slice(0, explosionCount);
+    console.log(`🎆 Explosión masiva del título con ${explosionCount} imágenes aleatorias`);
 
     for (let i = 0; i < explosionCount; i++) {
       setTimeout(async () => {
         try {
-          const randomImage = images[Math.floor(Math.random() * images.length)];
+          const randomImage = titleExplosionPool[i]; // Sin repetición garantizada
           const explosion = await createFloatingImage(randomImage);
           explosion.style.animation = "explode 2s ease-out";
           backgroundChaos.appendChild(explosion);
