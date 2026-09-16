@@ -103,7 +103,7 @@ if ("mediaSession" in navigator) {
   navigator.mediaSession.metadata = new MediaMetadata({
     title: "Jellyfish Jam",
     artist: "Bob Esponja",
-    album: "Mi cumpleaños · Edición 2026",
+    album: "Mi cumpleaños",
     artwork: [
       {
         src: "assets/gifs/fiesta-techno.webp",
