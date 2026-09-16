@@ -3,7 +3,9 @@
 // =======================================
 
 const $ = (selector, root = document) => root.querySelector(selector);
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const prefersReducedMotion = window.matchMedia(
+  "(prefers-reduced-motion: reduce)",
+).matches;
 
 const page = $("#page");
 const gate = $("#gate");
@@ -45,7 +47,7 @@ const videoObserver =
         }
       });
     },
-    { rootMargin: "200px 0px" }
+    { rootMargin: "200px 0px" },
   );
 
 document.querySelectorAll("video[data-src]").forEach((video) => {
@@ -56,7 +58,7 @@ document.querySelectorAll("video[data-src]").forEach((video) => {
 });
 
 ["click", "touchend", "keydown"].forEach((type) =>
-  document.addEventListener(type, retryBlockedVideos, { passive: true })
+  document.addEventListener(type, retryBlockedVideos, { passive: true }),
 );
 
 // =======================================
@@ -102,7 +104,13 @@ if ("mediaSession" in navigator) {
     title: "Jellyfish Jam",
     artist: "Bob Esponja",
     album: "Mi cumpleaños · Edición 2026",
-    artwork: [{ src: "assets/gifs/fiesta-techno.webp", sizes: "360x270", type: "image/webp" }],
+    artwork: [
+      {
+        src: "assets/gifs/fiesta-techno.webp",
+        sizes: "360x270",
+        type: "image/webp",
+      },
+    ],
   });
 
   // El botón de pausa de la pantalla de bloqueo tampoco funciona
@@ -121,18 +129,15 @@ if ("mediaSession" in navigator) {
 
 const troll = $("#troll");
 const trollVideo = $("video", troll);
-const trollMessages = [
-  "¿Quitar la música? JAJA no 🙃",
-  "Te dije que no se puede 😤",
-  "Ya ríndete y baila 🕺",
-];
+const trollMessages = ["¿Quitar la música? JAJA no", "¿Seguro?", "no se puede"];
 let muteAttempts = 0;
 let trollTimer;
 
 $("#dj-mute").addEventListener("click", () => {
   muteAttempts += 1;
   $("#troll-text").textContent =
-    trollMessages[muteAttempts - 1] ?? `Intento #${muteAttempts}. Sigue sonando 🎶`;
+    trollMessages[muteAttempts - 1] ??
+    `Intento #${muteAttempts}. Sigue sonando 🎶`;
   troll.hidden = false;
   playVideo(trollVideo);
 
@@ -290,7 +295,9 @@ form.addEventListener("submit", async (event) => {
     }, 4000);
   } catch (error) {
     console.error("❌ No se pudo enviar la confirmación:", error);
-    showStatus("😵 No se pudo enviar. Revisa tu internet e inténtalo otra vez.");
+    showStatus(
+      "😵 No se pudo enviar. Revisa tu internet e inténtalo otra vez.",
+    );
     submitButton.textContent = SUBMIT_LABEL;
     submitButton.disabled = false;
   }
@@ -310,9 +317,15 @@ function launchConfetti() {
   const pieces = Array.from({ length: 36 }, (_, i) => {
     const piece = document.createElement("span");
     piece.textContent = CONFETTI[i % CONFETTI.length];
-    piece.style.setProperty("--x", `${Math.round((Math.random() - 0.5) * 100)}vw`);
+    piece.style.setProperty(
+      "--x",
+      `${Math.round((Math.random() - 0.5) * 100)}vw`,
+    );
     piece.style.setProperty("--y", `${Math.round(-15 - Math.random() * 60)}vh`);
-    piece.style.setProperty("--r", `${Math.round((Math.random() - 0.5) * 720)}deg`);
+    piece.style.setProperty(
+      "--r",
+      `${Math.round((Math.random() - 0.5) * 720)}deg`,
+    );
     piece.style.setProperty("--delay", `${(Math.random() * 0.25).toFixed(2)}s`);
     return piece;
   });
