@@ -15,13 +15,13 @@
 2. Regístrate gratis con tu email
 3. Crea un nuevo formulario
 4. Copia tu FORM ID (algo como `mf24ykgr`)
-5. En `index.js` busca esta línea:
-   ```javascript
-   const FORMSPREE_URL = "https://formspree.io/f/TU_FORM_ID";
+5. En `index.html` busca el formulario:
+   ```html
+   <form class="rsvp__form" id="rsvp-form" action="https://formspree.io/f/TU_FORM_ID" method="POST">
    ```
-6. Reemplaza `TU_FORM_ID` con tu ID real:
-   ```javascript
-   const FORMSPREE_URL = "https://formspree.io/f/mf24ykgr";
+6. Reemplaza `TU_FORM_ID` con tu ID real (`index.js` toma la URL de ahí):
+   ```html
+   <form class="rsvp__form" id="rsvp-form" action="https://formspree.io/f/mf24ykgr" method="POST">
    ```
 7. ¡Listo! Ya recibirás emails con cada confirmación
 
@@ -161,19 +161,9 @@ Si quieres algo más avanzado después, puedes agregar Google Sheets.
 
 ## 🚀 ACTIVAR SERVICIO
 
-En `index.js`, busca esta sección:
+Formspree ya está activado. En `index.js` la función `sendConfirmation(name)` manda los campos `name`, `date`, `time` y `timestamp` a la URL del `action` del formulario.
 
-```javascript
-const promises = [
-  // Descomenta el que quieras usar:
-  // sendToGoogleSheets(name),
-  // sendViaEmailJS(name),
-  sendToFormspree(name), // ← Ya está activado
-  // sendToWebhook(name)
-];
-```
-
-¡Solo quita el `//` del servicio que configures!
+Para usar otro servicio, cambia el `fetch` de esa función. Si responde con error, la invitación avisa al invitado para que lo intente otra vez.
 
 ---
 
@@ -181,7 +171,6 @@ const promises = [
 
 Una vez configurado, cada vez que alguien confirme asistencia:
 
-- ✅ Se guarda localmente (backup)
 - 📧 Te llega notificación
 - 📊 Se registra en tu servicio elegido
 

@@ -1,154 +1,57 @@
-# 🚀 GUÍA DE OPTIMIZACIÓN DE IMÁGENES
+# 🚀 OPTIMIZACIÓN · EDICIÓN 2026
 
-## 🎯 ¿Por qué optimizar?
+## 📊 Resultado
 
-Tu invitación tiene **~1MB de imágenes** que pueden ralentizar la carga, especialmente en móviles. Con la optimización implementada:
+| Qué | Sin optimizar | Ahora |
+| --- | --- | --- |
+| 11 GIFs de Bob Esponja | ~22.5 MB (los `.gif` de Tenor) | 651 KB en MP4 + 71 KB de pósters |
+| Jellyfish Jam | 3.5 MB (192 kbps) | 2.3 MB (128 kbps) |
+| HTML + CSS + JS | — | ~14 KB comprimidos (gzip) |
 
-- ⚡ **Carga 3x más rápida**
-- 📱 **Mejor experiencia en móviles**
-- 🌐 **Menos uso de datos**
-- 🚀 **Animaciones más fluidas**
+Al abrir la invitación en el celular bajan ~0.5 MB más la canción. El resto de los GIFs se descarga al hacer scroll.
 
-## 🛠️ OPTIMIZACIONES IMPLEMENTADAS
+## 🎬 GIFs → videos MP4
 
-### 📋 1. Sistema Inteligente de Carga
+Cada "GIF" es un `<video muted loop playsinline>` con un MP4 corto: se ve igual, pero pesa ~95% menos.
 
-- **Precarga progresiva**: Primero las imágenes importantes, luego las secundarias
-- **Cache inteligente**: Las imágenes se cargan una vez y se reutilizan
-- **Límite de imágenes**: Máximo 15 en desktop, 8 en móviles
-- **Lazy loading**: Solo cargar imágenes visibles
+- **Carga diferida:** los videos tienen `data-src` y `preload="none"`. `index.js` les pone el `src` y los reproduce cuando están a menos de 200px de la pantalla. Cuando salen de pantalla se pausan para ahorrar batería.
+- **Póster:** mientras carga el video se ve un `.webp` chiquito del primer cuadro.
+- **Sin saltos:** `width` y `height` en cada `<video>` reservan el espacio antes de que cargue.
+- **Loops cortos:** los clips de menos de 1.5 s se repiten dentro del MP4 hasta ~3 s para que el loop no se vea trabado.
+- **iPhone en ahorro de energía:** Safari bloquea los videos automáticos; si pasa, se reproducen con el siguiente toque.
 
-### 🎭 2. Adaptación por Dispositivo
+## 🎵 Música
 
-- **Móviles**: Menos imágenes, animaciones más lentas, menor frecuencia de efectos
-- **Desktop**: Experiencia completa con todas las imágenes
-- **Detección de conexión**: Se adapta a conexiones lentas
+- Arranca al tocar **ABRIR INVITACIÓN**: los navegadores no dejan sonar audio sin un toque del usuario.
+- Se precarga cuando termina de cargar la página, para que suene al instante (no se precarga si el celular tiene ahorro de datos).
+- Se le quitó el silencio del inicio y del final para que el loop no tenga hueco.
+- No tiene pausa: el botón 🔇 solo se burla y acelera la canción un rato. Si la pausan desde el sistema o los audífonos, vuelve a sonar. Cuando la pestaña queda en segundo plano se pausa y al regresar continúa.
 
-### 🧹 3. Gestión de Memoria
+## 📝 Formulario
 
-- **Limpieza automática**: Elimina imágenes no visibles cada 30 segundos
-- **Placeholders**: Si una imagen falla, muestra un emoji animado
-- **Pausa inteligente**: Pausa animaciones cuando la página no es visible
+- Envía a Formspree con `fetch`; la URL sale del `action` del `<form>` en `index.html`.
+- Si falla la red avisa y conserva el nombre para reintentar (espera máximo 15 s).
+- Si `index.js` no carga, la portada no aparece y el formulario funciona igual con un envío normal a Formspree.
 
-### 📊 4. Monitoreo de Rendimiento
+## ➕ Agregar otro GIF
 
-- **Estadísticas en tiempo real**: Ve el rendimiento en la consola del navegador
-- **Detección de problemas**: Auto-limpieza si hay demasiadas imágenes
-- **Métricas de carga**: Tiempo promedio de carga de imágenes
+Requiere ffmpeg (`sudo apt install ffmpeg`).
 
-## 🔧 CÓMO OPTIMIZAR TUS IMÁGENES FÍSICAMENTE
+1. Descarga el GIF de Tenor (o su MP4, que pesa menos).
+2. Conviértelo:
+   ```bash
+   ./optimize_media.sh gif ~/Descargas/mi-gif.gif bob-nuevo
+   ```
+3. En `index.html` copia un `<figure class="sticker">` y cambia `data-src`, `poster`, `width`, `height` (el script te dice cuáles) y el texto.
 
-### Opción 1: Script Automático (Recomendado)
+Para cambiar la canción:
 
 ```bash
-# Instalar ImageMagick (solo una vez)
-brew install imagemagick  # macOS
-# o
-sudo apt-get install imagemagick  # Ubuntu
-
-# Ejecutar optimización
-./optimize_images.sh
+./optimize_media.sh audio "~/Descargas/otra cancion.mp3"
 ```
 
-Este script:
+y actualiza el `<source>` del `<audio id="music">` en `index.html`.
 
-- ✂️ Redimensiona imágenes a máximo 400x400px
-- 🗜️ Comprime JPEG a 85% de calidad
-- 🔄 Convierte PNG sin transparencia a JPEG
-- 📦 Reduce el tamaño total ~60-80%
+## 🔍 Comprobarlo
 
-### Opción 2: Herramientas Online
-
-- [TinyPNG](https://tinypng.com/) - Compresión automática
-- [Squoosh](https://squoosh.app/) - Control manual detallado
-- [Optimizilla](https://imagecompressor.com/) - Batch processing
-
-### Opción 3: Manual con Apps
-
-- **macOS**: ImageOptim (gratis)
-- **Windows**: FileOptimizer (gratis)
-- **Cualquiera**: Photoshop (Exportar para web)
-
-## 📱 CONFIGURACIÓN ACTUAL
-
-### Desktop (Pantallas grandes):
-
-- **Imágenes**: 15 máximo, 150x150px
-- **Precarga**: 8 imágenes prioritarias
-- **Efectos**: Completos, alta frecuencia
-
-### Tablet (768px - 1024px):
-
-- **Imágenes**: 12 máximo, 120x120px
-- **Precarga**: 6 imágenes prioritarias
-- **Efectos**: Reducidos ligeramente
-
-### Móvil (< 768px):
-
-- **Imágenes**: 8 máximo, 80-100px
-- **Precarga**: 4 imágenes prioritarias
-- **Efectos**: Mínimos, bajo consumo
-
-## 🎛️ AJUSTES AVANZADOS
-
-En `index.js`, puedes modificar `OPTIMIZATION_CONFIG`:
-
-```javascript
-const OPTIMIZATION_CONFIG = {
-  maxConcurrentLoads: 3, // Cargas simultáneas
-  retryAttempts: 2, // Reintentos si falla
-  preloadCount: 8, // Imágenes a precargar
-  maxActiveImages: 15, // Máximo en pantalla
-  lazyLoadThreshold: 100, // Distancia para lazy load
-};
-```
-
-## 📊 COMANDOS DE DEPURACIÓN
-
-Abre la consola del navegador (F12) y prueba:
-
-```javascript
-// Ver estadísticas de rendimiento
-performanceMonitor.getStats();
-
-// Ver imágenes cargadas
-console.log("Cargadas:", loadedImages.size);
-console.log("Fallidas:", failedImages.size);
-console.log("Cache:", imageCache.size);
-
-// Forzar limpieza
-cleanupInvisibleImages();
-
-// Ver configuración actual
-console.log(OPTIMIZATION_CONFIG);
-```
-
-## 🚀 RESULTADOS ESPERADOS
-
-Después de la optimización:
-
-### Antes:
-
-- 📦 **~1MB** de imágenes
-- ⏱️ **3-5s** carga inicial
-- 📱 **Lento en móviles**
-- 🔋 **Alto consumo de batería**
-
-### Después:
-
-- 📦 **~300-400KB** de imágenes
-- ⏱️ **1-2s** carga inicial
-- 📱 **Fluido en móviles**
-- 🔋 **Consumo optimizado**
-
-## 🎉 ¡LISTO!
-
-Tu invitación ahora tiene:
-
-- ✅ **Sistema de optimización automático**
-- ✅ **Adaptación por dispositivo**
-- ✅ **Gestión inteligente de memoria**
-- ✅ **Monitoreo de rendimiento**
-- ✅ **Fallbacks en caso de errores**
-
-¡Tus invitados tendrán una experiencia épica sin lag! 🎂✨
+DevTools → Network → recarga con la caché desactivada: al abrir solo bajan los GIFs visibles y la canción; los demás aparecen al hacer scroll.

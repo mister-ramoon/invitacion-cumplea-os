@@ -2,38 +2,183 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 ¡INVITACIÓN DE CUMPLEAÑOS! 🎉</title>
-    <link rel="stylesheet" href="index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>🍍 ¡ES MI CUMPLEAÑOS! · Edición 2026</title>
+    <meta name="description" content="Invitación oficial (y ridícula) a mi cumpleaños. 27 de Septiembre, 4:00 PM. ¡Confirma tu asistencia!">
+    <meta name="theme-color" content="#0b56c4">
+
+    <!-- Vista previa al compartir el link (WhatsApp, Telegram, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_MX">
+    <meta property="og:title" content="🍍 ¡ES MI CUMPLEAÑOS! · Edición 2026">
+    <meta property="og:description" content="27 de Septiembre, 4:00 PM. Confirma tu asistencia (la música no se puede quitar).">
+    <meta property="og:url" content="https://mister-ramoon.github.io/invitacion-cumplea-os/">
+    <meta property="og:image" content="https://mister-ramoon.github.io/invitacion-cumplea-os/assets/og-image.jpg">
+    <meta property="og:image:width" content="640">
+    <meta property="og:image:height" content="480">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍍</text></svg>">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&family=Luckiest+Guy&display=swap">
+    <link rel="stylesheet" href="index.css">
+
+    <!-- La portada solo se muestra si el JS carga; si falla, la invitación se ve directo -->
+    <script>document.documentElement.classList.add("js", "gate-open")</script>
+    <script src="index.js" defer onerror="document.documentElement.classList.remove('js', 'gate-open')"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="invitation-card">
-            <h1 class="title">🎂 ¡ES MI CUMPLEAÑOS!</h1>
-            
-            <div class="party-details">
-                <p>📅 <strong>Fecha:</strong> 27 de Septiembre</p>
-                <p>⏰ <strong>Hora:</strong> de 4:00 PM hasta que el cuerpo aguante</p>
-                <p>📍 <strong>Lugar:</strong> <a href="https://maps.app.goo.gl/qnSqa7RCRzUHwwfw7" target="_blank">Residencial Albaterria Rio de La Piedad 21</a></p>
-            </div>
-            
-            <form class="rsvp-form" id="rsvpForm">
-                <h3>¡Confirma tu asistencia <br> para darte de comer!</h3>
-                
-                <div class="form-group">
-                    <input type="text" id="name" name="name" required placeholder="Escribe tu nombre aquí">
-                </div>
-
-                <button type="submit" class="submit-btn">
-                    ¡CONFIRMAR ASISTENCIA!
-                </button>
-            </form>
+    <!-- Fondo de Bikini: flores del cielo y burbujas (decorativo) -->
+    <div class="ocean" aria-hidden="true">
+        <div class="ocean__flowers"></div>
+        <div class="ocean__bubbles">
+            <span style="--x: 4%; --s: 18px; --t: 13s; --d: -2s"></span>
+            <span style="--x: 14%; --s: 10px; --t: 9s; --d: -7s"></span>
+            <span style="--x: 27%; --s: 26px; --t: 16s; --d: -11s"></span>
+            <span style="--x: 41%; --s: 12px; --t: 10s; --d: -4s"></span>
+            <span style="--x: 55%; --s: 20px; --t: 14s; --d: -9s"></span>
+            <span style="--x: 68%; --s: 9px; --t: 8s; --d: -1s"></span>
+            <span style="--x: 79%; --s: 24px; --t: 15s; --d: -6s"></span>
+            <span style="--x: 91%; --s: 14px; --t: 11s; --d: -12s"></span>
         </div>
     </div>
-    
-    <script src="index.js"></script>
+
+    <!-- Portada: el toque para entrar es lo que permite que arranque la música -->
+    <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+        <div class="gate__card">
+            <h2 class="gate__title" id="gate-title">¡Te llegó una invitación!</h2>
+            <figure class="gate__gif">
+                <video class="gif" data-src="assets/gifs/bob-baile-campo.mp4" poster="assets/gifs/bob-baile-campo.webp" width="480" height="368" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+            </figure>
+            <button class="btn btn--gate" id="gate-open" type="button">
+                 ABRIR INVITACIÓN
+            </button>
+        </div>
+    </div>
+
+    <div class="page" id="page">
+        <div class="ticker" aria-hidden="true">
+            <div class="ticker__track">
+                <span>¡ES MI CUMPLE! ★ 26 DE SEPTIEMBRE ★ 7:00 PM ★ TRAE HAMBRE ★ ♫ TRAE GORDITAS DE NATA ★ CONFIRMA TU ASISTENSIA ★&nbsp;</span>
+                <span>¡ES MI CUMPLE! ★ 26 DE SEPTIEMBRE ★ 7:00 PM ★ TRAE HAMBRE ★ ♫ TRAE GORDITAS DE NATA ★ CONFIRMA TU ASISTENSIA ★&nbsp;</span>
+            </div>
+        </div>
+
+        <div class="stage">
+            <main class="main">
+                <section class="hero">
+                    <h1 class="title" id="title" tabindex="-1">¡ES MI CUMPLEAÑOS!</h1>
+                    <figure class="tv">
+                        <video class="gif" data-src="assets/gifs/cumple-pastel.mp4" poster="assets/gifs/cumple-pastel.webp" width="640" height="480" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                    </figure>
+                </section>
+
+                <section class="details" aria-label="Detalles de la fiesta">
+                    <p class="ticket ticket--date">
+                        <span class="ticket__icon" aria-hidden="true">📅</span>
+                        <span class="ticket__body"><span class="ticket__label">Fecha</span> <span class="ticket__value">26 de Septiembre</span></span>
+                    </p>
+                    <p class="ticket ticket--time">
+                        <span class="ticket__icon" aria-hidden="true">⏰</span>
+                        <span class="ticket__body"><span class="ticket__label">Hora</span> <span class="ticket__value">7:00 PM hasta que el cuerpo aguante</span></span>
+                    </p>
+                    <a class="ticket ticket--place" href="https://maps.app.goo.gl/gf37gEzafuEnjsPy8?g_st=aw" target="_blank" rel="noopener">
+                        <span class="ticket__icon" aria-hidden="true">📍</span>
+                        <span class="ticket__body"><span class="ticket__label">Lugar</span> <span class="ticket__value">AQUI VAMOS A COMER </span></span>
+                        <span class="ticket__cta">Abrir mapa ↗</span>
+                    </a>
+                </section>
+
+                <section class="rsvp" aria-labelledby="rsvp-title">
+                    <div class="rsvp__head">
+                        <h2 class="rsvp__title" id="rsvp-title">¡Confirma tu asistencia para darte de comer!</h2>
+                        <figure class="sticker sticker--rsvp" style="--tilt: 5deg">
+                            <video class="gif" data-src="assets/gifs/bob-cafe-esperando.mp4" poster="assets/gifs/bob-cafe-esperando.webp" width="246" height="196" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                            <figcaption>Confirma...</figcaption>
+                        </figure>
+                    </div>
+
+                    <form class="rsvp__form" id="rsvp-form" action="https://formspree.io/f/mkgvevpw" method="POST">
+                        <label class="rsvp__label" for="name">¿Cómo se llama tu nombre?</label>
+                        <input class="rsvp__input" type="text" id="name" name="name" required maxlength="80" autocomplete="name" autocapitalize="words" enterkeyhint="send" placeholder="Escribe tu nombre aquí" aria-describedby="rsvp-status">
+
+                        <div class="rsvp__status" id="rsvp-status" role="status" aria-live="polite" hidden>
+                            <video class="gif" data-src="assets/gifs/bob-en-serio.mp4" poster="assets/gifs/bob-en-serio.webp" width="166" height="166" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                            <p></p>
+                        </div>
+
+                        <button class="btn btn--submit" type="submit" id="rsvp-submit">¡CONFIRMAR ASISTENCIA!</button>
+                    </form>
+                </section>
+            </main>
+
+            <h2 class="gallery-title">Así va a ser</h2>
+
+            <div class="rail rail--left">
+                <figure class="sticker" style="--tilt: -4deg; --float: 0s">
+                    <video class="gif" data-src="assets/gifs/fiesta-techno.mp4" poster="assets/gifs/fiesta-techno.webp" width="480" height="360" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                    <figcaption></figcaption>
+                </figure>
+                <figure class="sticker" style="--tilt: 3deg; --float: -2s">
+                    <video class="gif" data-src="assets/gifs/patricio-risa.mp4" poster="assets/gifs/patricio-risa.webp" width="476" height="360" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                    <figcaption></figcaption>
+                </figure>
+                <figure class="sticker sticker--tall" style="--tilt: -2deg; --float: -4s">
+                    <video class="gif" data-src="assets/gifs/bob-burlon.mp4" poster="assets/gifs/bob-burlon.webp" width="240" height="344" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                </figure>
+                <figure class="sticker" style="--tilt: 4deg; --float: -1s">
+                    <video class="gif" data-src="assets/gifs/pizza-krusty.mp4" poster="assets/gifs/pizza-krusty.webp" width="480" height="362" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                </figure>
+            </div>
+
+            <div class="rail rail--right">
+                <figure class="sticker" style="--tilt: 3deg; --float: -3s">
+                    <video class="gif" data-src="assets/gifs/bob-disco.mp4" poster="assets/gifs/bob-disco.webp" width="480" height="414" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                </figure>
+                <figure class="sticker sticker--square" style="--tilt: -5deg; --float: -5s">
+                    <video class="gif" data-src="assets/gifs/bob-en-serio.mp4" poster="assets/gifs/bob-en-serio.webp" width="166" height="166" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                </figure>
+                <figure class="sticker sticker--square" style="--tilt: 4deg; --float: -2s">
+                    <video class="gif" data-src="assets/gifs/bob-grito.mp4" poster="assets/gifs/bob-grito.webp" width="180" height="180" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                </figure>
+                <figure class="sticker" style="--tilt: -3deg; --float: -6s">
+                    <video class="gif" data-src="assets/gifs/bob-baile-campo.mp4" poster="assets/gifs/bob-baile-campo.webp" width="480" height="368" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                </figure>
+            </div>
+        </div>
+
+        <!-- Reproductor sin pausa. Es a propósito. -->
+        <aside class="dj" aria-label="Música">
+            <div class="troll" id="troll" role="status" hidden>
+                <video class="gif" data-src="assets/gifs/bob-grito.mp4" poster="assets/gifs/bob-grito.webp" width="180" height="180" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                <p id="troll-text"></p>
+            </div>
+            <button class="dj__btn" id="dj-mute" type="button">
+                <span class="dj__disc">
+                    <video class="gif" data-src="assets/gifs/bob-bailando.mp4" poster="assets/gifs/bob-bailando.webp" width="120" height="124" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+                    <span class="dj__badge" aria-hidden="true">🔇</span>
+                </span>
+                <span class="dj__text">
+                    <span class="dj__action">Quitar la música</span>
+                </span>
+            </button>
+        </aside>
+    </div>
+
+    <dialog class="party" id="party" aria-labelledby="party-title">
+        <div class="party__confetti" aria-hidden="true"></div>
+        <form class="party__card" method="dialog">
+            <h2 class="party__title" id="party-title">¡LISTO, <span id="party-name"></span>!</h2>
+            <p class="party__text">Ya estás en la lista. Tú después de confirmar:</p>
+            <video class="gif" data-src="assets/gifs/bob-disco.mp4" poster="assets/gifs/bob-disco.webp" width="480" height="414" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+            <button class="btn btn--party" type="submit">¡Ahí nos vemos! 🎉</button>
+        </form>
+    </dialog>
+
+    <audio id="music" loop preload="none">
+        <source src="assets/audio/jellyfish-jam.mp3" type="audio/mpeg">
+    </audio>
 </body>
 </html>
